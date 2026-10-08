@@ -12,8 +12,10 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Registers this installation with the adapter: creates the Magento integration (token), sends it with the store's base URL,
@@ -53,6 +55,11 @@ class ConnectSave extends Action implements HttpPostActionInterface
      */
     private $authSession;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         Context $context,
         AdapterClient $adapter,
@@ -60,7 +67,8 @@ class ConnectSave extends Action implements HttpPostActionInterface
         StoreManagerInterface $storeManager,
         ScopeConfigInterface $scopeConfig,
         ProductMetadataInterface $productMetadata,
-        AuthSession $authSession
+        AuthSession $authSession,
+        LoggerInterface $logger
     )
     {
         parent::__construct($context);
@@ -70,12 +78,14 @@ class ConnectSave extends Action implements HttpPostActionInterface
         $this->scopeConfig = $scopeConfig;
         $this->productMetadata = $productMetadata;
         $this->authSession = $authSession;
+        $this->logger = $logger;
     }
 
     public function execute()
     {
         $redirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         try {
+            $this->logger->info('Flipick: connecting this store to the adapter');
             $token = $this->integrations->ensureAccessToken();
             $baseUrl = rtrim((string)$this->scopeConfig->getValue('web/secure/base_url', ScopeInterface::SCOPE_STORE), '/');
             $name = trim((string)$this->scopeConfig->getValue('general/store_information/name'));
@@ -95,8 +105,15 @@ class ConnectSave extends Action implements HttpPostActionInterface
                 count($result['stores'] ?? [])
             ));
             return $redirect->setPath('*/*/billing');
-        } catch (\Throwable $e) {
+        } catch (LocalizedException $e) {
+            // A message written for the admin (adapter unreachable, token rejected ...): show it, log it.
+            $this->logger->warning('Flipick: connect failed', ['error' => $e->getMessage()]);
             $this->messageManager->addErrorMessage($e->getMessage());
+            return $redirect->setPath('*/*/connect');
+        } catch (\Throwable $e) {
+            // Anything unexpected: the details go to the log, the admin gets a safe message.
+            $this->logger->error('Flipick: connect crashed', ['exception' => $e]);
+            $this->messageManager->addErrorMessage(__('Could not connect to Flipick. The details are in var/log/system.log; please try again or contact support.'));
             return $redirect->setPath('*/*/connect');
         }
     }

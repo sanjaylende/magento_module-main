@@ -7,6 +7,7 @@ use Flipick\VideoGenerator\Model\AdapterClient;
 use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /** Content of the Plans & Billing page: a website picker and the adapter's billing screens in a frame. */
 class Billing extends Template
@@ -21,16 +22,23 @@ class Billing extends Template
      */
     private $storeManager;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         Context $context,
         AdapterClient $adapter,
         StoreManagerInterface $storeManager,
+        LoggerInterface $logger,
         array $data = []
     )
     {
         parent::__construct($context, $data);
         $this->adapter = $adapter;
         $this->storeManager = $storeManager;
+        $this->logger = $logger;
     }
 
     /** @return array<int, array{id: string, name: string, url: string, current: bool}> */
@@ -58,6 +66,12 @@ class Billing extends Template
     /** One-time launch URL for the adapter UI. */
     public function getFrameUrl(): string
     {
-        return $this->adapter->launchUrl($this->getCurrentWebsiteId());
+        try {
+            return $this->adapter->launchUrl($this->getCurrentWebsiteId());
+        } catch (\Throwable $e) {
+            // The page shows a message instead of an empty frame (see billing.phtml).
+            $this->logger->error('Flipick: could not build the Plans & Billing URL', ['exception' => $e]);
+            return '';
+        }
     }
 }

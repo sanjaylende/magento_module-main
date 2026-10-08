@@ -5,6 +5,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Psr\Log\LoggerInterface;
 
 // AddVideoAttributes created generated_video_url/generated_video_thumbnail
 // as backend_type 'varchar' -- catalog_product_entity_varchar.value is a
@@ -25,22 +26,35 @@ class WidenVideoAttributes implements DataPatchInterface
      */
     private $eavSetupFactory;
 
-    public function __construct(ModuleDataSetupInterface $moduleDataSetup, EavSetupFactory $eavSetupFactory)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(ModuleDataSetupInterface $moduleDataSetup, EavSetupFactory $eavSetupFactory, LoggerInterface $logger)
     {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->eavSetupFactory = $eavSetupFactory;
+        $this->logger = $logger;
     }
 
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
-        $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
+        try {
+            $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
-        foreach (['generated_video_url', 'generated_video_thumbnail'] as $code) {
-            $eavSetup->updateAttribute(Product::ENTITY, $code, 'backend_type', 'text');
+            foreach (['generated_video_url', 'generated_video_thumbnail'] as $code) {
+                $eavSetup->updateAttribute(Product::ENTITY, $code, 'backend_type', 'text');
+            }
+            $this->logger->info('Flipick: data patch WidenVideoAttributes applied');
+        } catch (\Throwable $e) {
+            // Rethrow: Magento must not record a failed patch as applied.
+            $this->logger->error('Flipick: data patch WidenVideoAttributes failed', ['exception' => $e]);
+            throw $e;
+        } finally {
+            $this->moduleDataSetup->getConnection()->endSetup();
         }
-
-        $this->moduleDataSetup->getConnection()->endSetup();
     }
 
     public static function getDependencies(): array

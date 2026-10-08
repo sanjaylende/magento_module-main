@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Every class of this extension logs to its own rotated file (var/log/flipick_videogenerator.log); warnings and errors are also passed to Magento's system.log. -->
+    <type name="Flipick\VideoGenerator\Model\AdapterClient">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Model\IntegrationManager">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\ConnectSave">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Launch">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Refresh">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Index">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Billing">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Connect">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Ui\DataProvider\VideoProducts">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Setup\Uninstall">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Block\ProductVideo">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Block\Adminhtml\Billing">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Model\Config\Source\Websites">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Model\Csp\AdapterCollector">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Setup\Patch\Data\AddVideoAttributes">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Setup\Patch\Data\WidenVideoAttributes">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+</config>
