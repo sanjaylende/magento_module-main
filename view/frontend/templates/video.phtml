@@ -1,0 +1,15 @@
+<?php
+/** @var \Flipick\VideoGenerator\Block\ProductVideo $block */
+if (!$block->hasVideo()) {
+    return;
+}
+?>
+<div class="flipick-product-video" style="margin: 0 0 20px;">
+    <video
+        controls
+        <?php if ($block->getThumbnailUrl()): ?>poster="<?= $block->escapeUrl($block->getThumbnailUrl()) ?>"<?php endif; ?>
+        style="width: 100%; max-width: 480px; border-radius: 8px;"
+    >
+        <source src="<?= $block->escapeUrl($block->getVideoUrl()) ?>" type="video/mp4">
+    </video>
+</div>

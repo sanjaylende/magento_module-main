@@ -1,0 +1,25 @@
+<?php
+/** @var \Flipick\VideoGenerator\Block\Adminhtml\Connect $block */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+<div class="admin__fieldset-wrapper" style="max-width: 720px;">
+    <p>
+        <?= $escaper->escapeHtml(__('Connect this store to Flipick to create product videos from the Magento admin. Each website starts on a free trial of 5 videos.')) ?>
+    </p>
+    <p>
+        <?= $escaper->escapeHtml(__('Connecting creates a limited Magento integration named "Flipick Video Generator" (it can read your catalog and write the video fields of products) and registers this store with Flipick. You can review or revoke it under System > Extensions > Integrations.')) ?>
+    </p>
+    <?php if (!$block->isAdapterUrlSet()): ?>
+        <div class="message message-warning">
+            <?= $escaper->escapeHtml(__('The Flipick service address is not set yet.')) ?>
+            <a href="<?= $escaper->escapeUrl($block->getConfigUrl()) ?>"><?= $escaper->escapeHtml(__('Open settings')) ?></a>
+        </div>
+    <?php else: ?>
+        <form action="<?= $escaper->escapeUrl($block->getSaveUrl()) ?>" method="post" id="flipick-connect-form">
+            <?= $block->getBlockHtml('formkey') ?>
+            <button type="submit" class="action-primary">
+                <span><?= $escaper->escapeHtml($block->isConnected() ? __('Reconnect to Flipick') : __('Connect to Flipick')) ?></span>
+            </button>
+        </form>
+    <?php endif; ?>
+</div>

@@ -1,0 +1,24 @@
+{
+    "name": "flipick/module-video-generator",
+    "description": "Create AI product videos for your Magento catalog with Flipick, and show them on product pages.",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": "proprietary",
+    "require": {
+        "php": "~7.3.0||~7.4.0||~8.1.0||~8.2.0||~8.3.0||~8.4.0||~8.5.0",
+        "magento/framework": ">=103.0.3",
+        "magento/module-backend": "*",
+        "magento/module-catalog": "*",
+        "magento/module-config": "*",
+        "magento/module-eav": "*",
+        "magento/module-integration": "*",
+        "magento/module-store": "*",
+        "magento/module-ui": "*"
+    },
+    "autoload": {
+        "files": ["registration.php"],
+        "psr-4": {
+            "Flipick\VideoGenerator\\": ""
+        }
+    }
+}

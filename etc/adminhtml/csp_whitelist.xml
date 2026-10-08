@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Without this, the browser silently blocks the iframe in modal.phtml
+    regardless of the markup being correct. Magento Admin's own
+    Content-Security-Policy restricts frame-src by default, and that
+    restriction is enforced client-side, independent of anything the
+    adapter's own server.js does or doesn't send.
+
+    Uncomment the value below and set it to match the Adapter URL configured
+    at Stores -> Configuration -> Video Generator Url (adapter_url), which
+    Block/Adminhtml/Modal.php reads via ScopeConfigInterface.
+-->
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="frame-src">
+            <values>
+                <value id="flipick_video_generator_adapter" type="host">http://localhost:4200</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

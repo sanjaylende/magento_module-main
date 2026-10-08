@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!--
+            Placed into product.info.main (the main product-details column),
+            before everything else in it (before="-"), deliberately NOT
+            injected into the Fotorama/gallery widget's own container, which
+            would mean fighting that widget's Knockout.js internals for a
+            format (an arbitrary hosted mp4) it isn't built to handle. Move
+            this block elsewhere in your theme's layout if you'd rather it
+            render somewhere else on the page.
+        -->
+        <referenceContainer name="product.info.main">
+            <block class="Flipick\VideoGenerator\Block\ProductVideo"
+                   name="flipick.product.video"
+                   template="Flipick_VideoGenerator::video.phtml"
+                   before="-"/>
+        </referenceContainer>
+    </body>
+</page>

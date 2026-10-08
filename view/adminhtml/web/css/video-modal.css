@@ -1,0 +1,7 @@
+.flipick-video-modal .modal-inner-wrap { width: 92%; max-width: 1400px; margin-left: auto; margin-right: auto; }
+.flipick-video-modal .modal-content { padding: 0; }
+.flipick-video-modal-content iframe { display: block; width: 100%; height: calc(100vh - 140px); border: 0; }
+.flipick-video-none { color: #999; }
+.data-grid-actions-cell a { white-space: nowrap; }
+/* The framed app has its own heading. The title block stays (hidden) so the admin header keeps its normal layout. */
+.flipick-billing-page .page-title-wrapper .page-title { visibility: hidden; }

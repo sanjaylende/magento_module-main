@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">flipick_video_listing.flipick_video_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="billing">
+                <url path="*/*/billing"/>
+                <class>primary</class>
+                <label translate="true">Plans &amp; Billing</label>
+            </button>
+            <button name="refresh">
+                <url path="*/*/refresh"/>
+                <class>secondary</class>
+                <label translate="true">Refresh from Magento</label>
+            </button>
+        </buttons>
+        <spinner>flipick_video_columns</spinner>
+        <deps>
+            <dep>flipick_video_listing.flipick_video_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="flipick_video_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">uniqueTag</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>Flipick_VideoGenerator::video_generator</aclResource>
+        <dataProvider class="Flipick\VideoGenerator\Ui\DataProvider\VideoProducts" name="flipick_video_listing_data_source">
+            <settings>
+                <requestFieldName>uniqueTag</requestFieldName>
+                <primaryFieldName>uniqueTag</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filterSearch name="fulltext"/>
+        <filters name="listing_filters">
+            <filterSelect name="website_id" provider="${ $.parentName }">
+                <settings>
+                    <options class="Flipick\VideoGenerator\Model\Config\Source\Websites"/>
+                    <caption translate="true">Default website</caption>
+                    <label translate="true">Website</label>
+                    <dataScope>website_id</dataScope>
+                </settings>
+            </filterSelect>
+        </filters>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="flipick_video_columns">
+        <column name="image" component="Magento_Ui/js/grid/columns/thumbnail" sortOrder="10">
+            <settings>
+                <hasPreview>1</hasPreview>
+                <addField>true</addField>
+                <label translate="true">Thumbnail</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="name" sortOrder="20">
+            <settings>
+                <label translate="true">Name</label>
+            </settings>
+        </column>
+        <column name="sku" sortOrder="30">
+            <settings>
+                <label translate="true">SKU</label>
+            </settings>
+        </column>
+        <column name="category" sortOrder="40">
+            <settings>
+                <label translate="true">Category</label>
+            </settings>
+        </column>
+        <column name="price" sortOrder="50">
+            <settings>
+                <label translate="true">Price</label>
+            </settings>
+        </column>
+        <column name="video_hero" sortOrder="60">
+            <settings>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Hero Product</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="video_lifestyle" sortOrder="70">
+            <settings>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Lifestyle</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="video_transition" sortOrder="80">
+            <settings>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">Image Transitions</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="last_generated" sortOrder="90">
+            <settings>
+                <label translate="true">Last generated</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" component="Flipick_VideoGenerator/js/grid/columns/actions" sortOrder="100">
+            <settings>
+                <indexField>uniqueTag</indexField>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

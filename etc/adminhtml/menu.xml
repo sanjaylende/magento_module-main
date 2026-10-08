@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+    Menu: Flipick > Settings (this module's system configuration) and Flipick > Plans & Billing (the page that frames the
+    adapter UI). menu.xml actions are validated against ^[A-Za-z0-9/_-]+$, so they must be admin routes, never the
+    adapter's own URL. The product grid page (flipick_videogenerator/index/index) still exists but has no menu entry.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Flipick_VideoGenerator::video_generator" title="Flipick" translate="title" module="Flipick_VideoGenerator" sortOrder="100" resource="Flipick_VideoGenerator::video_generator"/>
+        <add id="Flipick_VideoGenerator::video_generator_config_link" title="Settings" translate="title" module="Flipick_VideoGenerator" sortOrder="5" parent="Flipick_VideoGenerator::video_generator" action="adminhtml/system_config/edit/section/flipick_videogenerator" resource="Flipick_VideoGenerator::video_generator"/>
+        <add id="Flipick_VideoGenerator::video_generator_billing" title="Plans &amp; Billing" translate="title" module="Flipick_VideoGenerator" sortOrder="20" parent="Flipick_VideoGenerator::video_generator" action="flipick_videogenerator/index/billing" resource="Flipick_VideoGenerator::video_generator"/>
+    </menu>
+</config>

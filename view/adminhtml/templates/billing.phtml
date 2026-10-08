@@ -1,0 +1,20 @@
+<?php
+/** @var \Flipick\VideoGenerator\Block\Adminhtml\Billing $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$websites = $block->getWebsites();
+?>
+<?php if (count($websites) > 1): ?>
+    <p>
+        <strong><?= $escaper->escapeHtml(__('Website:')) ?></strong>
+        <?php foreach ($websites as $website): ?>
+            <?php if ($website['current']): ?>
+                <strong><?= $escaper->escapeHtml($website['name']) ?></strong>
+            <?php else: ?>
+                <a href="<?= $escaper->escapeUrl($website['url']) ?>"><?= $escaper->escapeHtml($website['name']) ?></a>
+            <?php endif; ?>
+            &nbsp;
+        <?php endforeach; ?>
+    </p>
+<?php endif; ?>
+<iframe src="<?= $escaper->escapeUrl($block->getFrameUrl()) ?>" title="<?= $escaper->escapeHtmlAttr(__('Plans & Billing')) ?>"
+        style="width: 100%; height: calc(100vh - 220px); min-height: 600px; border: 1px solid #ccc; background: #fff;"></iframe>

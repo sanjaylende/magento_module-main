@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="flipick_videogenerator" translate="label" type="text" sortOrder="1000" showInDefault="1">
+            <label>Video Generator</label>
+            <tab>general</tab>
+            <resource>Flipick_VideoGenerator::video_generator</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1">
+                <label>General</label>
+                <field id="adapter_url" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                    <label>Adapter URL</label>
+                    <comment>Where the Node adapter is reachable from an admin's own browser (opened in a modal from the Video Generator grid). Must also be listed in this module's etc/adminhtml/csp_whitelist.xml (frame-src).</comment>
+                </field>
+                <field id="adapter_server_url" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                    <label>Adapter URL (server-side)</label>
+                    <comment>Optional. Where Magento itself (the PHP server) reaches the adapter, used to fill the Video Generator grid. Leave empty to reuse the Adapter URL above; when that is localhost, host.docker.internal is used so a Dockerised Magento can reach the host.</comment>
+                </field>
+                <field id="store_url_for_adapter" translate="label comment" type="text" sortOrder="30" showInDefault="1">
+                    <label>Store URL for the adapter</label>
+                    <comment>Optional. The address the Flipick service uses to reach this Magento store. Leave empty to use the store's own base URL.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
