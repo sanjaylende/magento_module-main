@@ -10,6 +10,7 @@ use Magento\Integration\Api\AuthorizationServiceInterface;
 use Magento\Integration\Api\IntegrationServiceInterface;
 use Magento\Integration\Api\OauthServiceInterface;
 use Magento\Integration\Model\Integration;
+use Psr\Log\LoggerInterface;
 
 /**
  * Creates (once) the Magento integration the Flipick adapter uses to read the catalog and write the video attributes,
@@ -58,12 +59,18 @@ class IntegrationManager
      */
     private $cacheTypeList;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         IntegrationServiceInterface $integrationService,
         AuthorizationServiceInterface $authorizationService,
         OauthServiceInterface $oauthService,
         WriterInterface $configWriter,
-        TypeListInterface $cacheTypeList
+        TypeListInterface $cacheTypeList,
+        LoggerInterface $logger
     )
     {
         $this->integrationService = $integrationService;
@@ -71,6 +78,7 @@ class IntegrationManager
         $this->oauthService = $oauthService;
         $this->configWriter = $configWriter;
         $this->cacheTypeList = $cacheTypeList;
+        $this->logger = $logger;
     }
 
     /**
@@ -84,6 +92,7 @@ class IntegrationManager
 
         $integration = $this->integrationService->findByName(self::NAME);
         if (!$integration->getId()) {
+            $this->logger->info('Flipick: creating the Magento integration', ['name' => self::NAME]);
             $integration = $this->integrationService->create([
                 'name' => self::NAME,
                 'status' => Integration::STATUS_INACTIVE,
@@ -104,8 +113,10 @@ class IntegrationManager
             $token = $this->oauthService->getAccessToken($consumerId);
         }
         if (!$token) {
+            $this->logger->error('Flipick: the Magento integration token could not be created', ['integration_id' => (int)$integration->getId()]);
             throw new LocalizedException(__('Could not create the Magento integration token.'));
         }
+        $this->logger->info('Flipick: Magento integration ready', ['integration_id' => (int)$integration->getId()]);
 
         return (string)$token->getToken();
     }

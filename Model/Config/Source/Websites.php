@@ -5,6 +5,7 @@ namespace Flipick\VideoGenerator\Model\Config\Source;
 
 use Magento\Framework\Data\OptionSourceInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /** Websites of this Magento installation, for the grid's Website filter. Each website is a separately billed store. */
 class Websites implements OptionSourceInterface
@@ -14,16 +15,26 @@ class Websites implements OptionSourceInterface
      */
     private $storeManager;
 
-    public function __construct(StoreManagerInterface $storeManager)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(StoreManagerInterface $storeManager, LoggerInterface $logger)
     {
         $this->storeManager = $storeManager;
+        $this->logger = $logger;
     }
 
     public function toOptionArray(): array
     {
         $options = [];
-        foreach ($this->storeManager->getWebsites() as $website) {
-            $options[] = ['value' => (string)$website->getId(), 'label' => $website->getName()];
+        try {
+            foreach ($this->storeManager->getWebsites() as $website) {
+                $options[] = ['value' => (string)$website->getId(), 'label' => $website->getName()];
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Flipick: could not list the websites', ['exception' => $e]);
         }
         return $options;
     }

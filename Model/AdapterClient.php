@@ -10,6 +10,7 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\HTTP\Client\CurlFactory;
 use Magento\Framework\Serialize\Serializer\Json;
+use Psr\Log\LoggerInterface;
 
 /**
  * Talks to the central Flipick adapter on behalf of this Magento installation.
@@ -60,13 +61,19 @@ class AdapterClient
      */
     private $json;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         WriterInterface $configWriter,
         TypeListInterface $cacheTypeList,
         EncryptorInterface $encryptor,
         CurlFactory $curlFactory,
-        Json $json
+        Json $json,
+        LoggerInterface $logger
     )
     {
         $this->scopeConfig = $scopeConfig;
@@ -75,6 +82,7 @@ class AdapterClient
         $this->encryptor = $encryptor;
         $this->curlFactory = $curlFactory;
         $this->json = $json;
+        $this->logger = $logger;
     }
 
     /** URL the admin's browser loads (iframe). */
@@ -115,6 +123,7 @@ class AdapterClient
         $this->configWriter->save(self::XML_PATH_INSTALL_KEY, $installKey);
         $this->configWriter->save(self::XML_PATH_SECRET, $this->encryptor->encrypt($secret));
         $this->cacheTypeList->cleanType('config');
+        $this->logger->info('Flipick: adapter credentials saved', ['install_key' => $installKey]);
     }
 
     public function clearCredentials(): void
@@ -122,6 +131,7 @@ class AdapterClient
         $this->configWriter->delete(self::XML_PATH_INSTALL_KEY);
         $this->configWriter->delete(self::XML_PATH_SECRET);
         $this->cacheTypeList->cleanType('config');
+        $this->logger->info('Flipick: adapter credentials cleared');
     }
 
     /**
@@ -159,6 +169,8 @@ class AdapterClient
      */
     public function launchUrl(string $websiteId, ?string $uniqueTag = null): string
     {
+        $this->assertWebsiteId($websiteId);
+        $this->assertHttpUrl($this->getBrowserUrl());
         $payload = rtrim(strtr(base64_encode((string)$this->json->serialize([
             'k' => $this->getInstallKey(),
             'w' => $websiteId,
@@ -173,6 +185,32 @@ class AdapterClient
         return $this->getBrowserUrl() . '/?' . http_build_query($query);
     }
 
+    /**
+     * Website ids are numeric. The id travels in an HTTP header and in the launch token, so anything else (for example a
+     * request parameter containing line breaks) is refused.
+     *
+     * @throws LocalizedException
+     */
+    private function assertWebsiteId(string $websiteId): void
+    {
+        if ($websiteId === '' || !ctype_digit($websiteId)) {
+            throw new LocalizedException(__('Invalid website.'));
+        }
+    }
+
+    /**
+     * Only http(s) addresses are ever contacted or framed (no file://, gopher://, javascript: ...).
+     *
+     * @throws LocalizedException
+     */
+    private function assertHttpUrl(string $url): void
+    {
+        $scheme = strtolower((string)parse_url($url, PHP_URL_SCHEME));
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            throw new LocalizedException(__('The Adapter URL must start with http:// or https://.'));
+        }
+    }
+
     private function signed(string $method, string $path, ?array $body, ?string $websiteId): array
     {
         if (!$this->isConnected()) {
@@ -183,6 +221,7 @@ class AdapterClient
         } catch (LocalizedException $e) {
             // A website created after connecting is unknown to the adapter until the websites are synced.
             if ($websiteId !== null && strpos($e->getMessage(), 'Unknown store') !== false) {
+                $this->logger->info('Flipick: website unknown to the adapter, syncing websites and retrying', ['website' => $websiteId]);
                 $this->send('POST', '/api/v1/stores/sync', [], null, true);
                 return $this->send($method, $path, $body, $websiteId, true);
             }
@@ -196,9 +235,14 @@ class AdapterClient
         if ($base === '') {
             throw new LocalizedException(__('Set the Adapter URL under Stores > Configuration > Video Generator.'));
         }
+        $this->assertHttpUrl($base);
+        if ($websiteId !== null) {
+            $this->assertWebsiteId($websiteId);
+        }
         $raw = $body === null ? '' : ($body === [] ? '{}' : (string)$this->json->serialize($body));
         $curl = $this->curlFactory->create();
         $curl->setTimeout(90); // the first call may fetch the whole Magento catalog
+        $curl->setOption(CURLOPT_CONNECTTIMEOUT, 10);
         $curl->addHeader('Accept', 'application/json');
         if ($raw !== '') {
             $curl->addHeader('Content-Type', 'application/json');
@@ -218,19 +262,30 @@ class AdapterClient
                 $curl->addHeader('X-Flipick-Website', $websiteId);
             }
         }
+        $startedAt = microtime(true);
         try {
             $method === 'POST' ? $curl->post($base . $path, $raw) : $curl->get($base . $path);
         } catch (\Throwable $e) {
+            $this->logger->error('Flipick: cannot reach the video adapter', [
+                'method' => $method, 'path' => $path, 'base' => $base, 'error' => $e->getMessage(),
+                'ms' => (int)((microtime(true) - $startedAt) * 1000),
+            ]);
             throw new LocalizedException(__('Cannot reach the video adapter at %1: %2', $base, $e->getMessage()));
         }
+        $elapsedMs = (int)((microtime(true) - $startedAt) * 1000);
         $responseBody = (string)$curl->getBody();
         $data = [];
         try {
             $data = $responseBody !== '' ? (array)$this->json->unserialize($responseBody) : [];
         } catch (\Throwable $e) {
             // non-JSON body: handled by the status check below
+            $this->logger->warning('Flipick: adapter answered with a non-JSON body', ['path' => $path, 'status' => $curl->getStatus()]);
         }
+        $this->logger->debug('Flipick: adapter call', ['method' => $method, 'path' => $path, 'status' => $curl->getStatus(), 'ms' => $elapsedMs]);
         if ($curl->getStatus() >= 400) {
+            $this->logger->warning('Flipick: adapter rejected the call', [
+                'method' => $method, 'path' => $path, 'status' => $curl->getStatus(), 'error' => $data['error'] ?? null, 'ms' => $elapsedMs,
+            ]);
             throw new LocalizedException(__('Video adapter error (%1): %2', $curl->getStatus(), $data['error'] ?? $responseBody));
         }
         return $data;

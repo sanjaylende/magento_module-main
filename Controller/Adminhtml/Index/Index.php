@@ -8,6 +8,7 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\ResultFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * Video Generator page: a standard admin grid (ui_component flipick_video_listing) of the products of one website and their
@@ -23,10 +24,16 @@ class Index extends Action implements HttpGetActionInterface
      */
     private $adapter;
 
-    public function __construct(Context $context, AdapterClient $adapter)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(Context $context, AdapterClient $adapter, LoggerInterface $logger)
     {
         parent::__construct($context);
         $this->adapter = $adapter;
+        $this->logger = $logger;
     }
 
     public function execute()
@@ -38,6 +45,7 @@ class Index extends Action implements HttpGetActionInterface
         try {
             $this->adapter->post('/api/v1/ping', ['extensionVersion' => AdapterClient::EXTENSION_VERSION]);
         } catch (\Throwable $e) {
+            $this->logger->warning('Flipick: adapter ping failed when opening Video Generator', ['error' => $e->getMessage()]);
             $this->messageManager->addErrorMessage($e->getMessage());
         }
         $resultPage = $this->resultFactory->create(ResultFactory::TYPE_PAGE);

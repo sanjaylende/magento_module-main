@@ -8,6 +8,7 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\ResultFactory;
+use Psr\Log\LoggerInterface;
 
 /** Plans & Billing page: the adapter's billing screens for one website, framed in the admin. */
 class Billing extends Action implements HttpGetActionInterface
@@ -19,10 +20,16 @@ class Billing extends Action implements HttpGetActionInterface
      */
     private $adapter;
 
-    public function __construct(Context $context, AdapterClient $adapter)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(Context $context, AdapterClient $adapter, LoggerInterface $logger)
     {
         parent::__construct($context);
         $this->adapter = $adapter;
+        $this->logger = $logger;
     }
 
     public function execute()
@@ -30,10 +37,16 @@ class Billing extends Action implements HttpGetActionInterface
         if (!$this->adapter->isConnected()) {
             return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/connect');
         }
-        $resultPage = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
-        $resultPage->setActiveMenu('Flipick_VideoGenerator::video_generator_billing');
-        $resultPage->getConfig()->getTitle()->prepend(__('Plans & Billing'));
+        try {
+            $resultPage = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
+            $resultPage->setActiveMenu('Flipick_VideoGenerator::video_generator_billing');
+            $resultPage->getConfig()->getTitle()->prepend(__('Plans & Billing'));
 
-        return $resultPage;
+            return $resultPage;
+        } catch (\Throwable $e) {
+            $this->logger->error('Flipick: Plans & Billing page failed', ['exception' => $e]);
+            $this->messageManager->addErrorMessage(__('Plans & Billing could not be opened. The details are in var/log/system.log.'));
+            return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/index');
+        }
     }
 }

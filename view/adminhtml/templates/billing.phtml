@@ -16,5 +16,10 @@ $websites = $block->getWebsites();
         <?php endforeach; ?>
     </p>
 <?php endif; ?>
-<iframe src="<?= $escaper->escapeUrl($block->getFrameUrl()) ?>" title="<?= $escaper->escapeHtmlAttr(__('Plans & Billing')) ?>"
+<?php $frameUrl = $block->getFrameUrl(); ?>
+<?php if ($frameUrl === ''): ?>
+    <div class="message message-error"><?= $escaper->escapeHtml(__('Plans & Billing could not be opened. Check Stores > Configuration > Video Generator and var/log/system.log, then try again.')) ?></div>
+<?php else: ?>
+<iframe src="<?= $escaper->escapeUrl($frameUrl) ?>" title="<?= $escaper->escapeHtmlAttr(__('Plans & Billing')) ?>"
         style="width: 100%; height: calc(100vh - 220px); min-height: 600px; border: 1px solid #ccc; background: #fff;"></iframe>
+<?php endif; ?>

@@ -8,6 +8,7 @@ use Magento\Framework\Api\Filter;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProviderInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Feeds the flipick_video_listing grid from the adapter's GET /api/products. The adapter returns the whole catalog
@@ -70,6 +71,11 @@ class VideoProducts implements DataProviderInterface
     private $urlBuilder;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var array
      */
     private $meta;
@@ -86,6 +92,7 @@ class VideoProducts implements DataProviderInterface
         AdapterClient $adapter,
         StoreManagerInterface $storeManager,
         UrlInterface $urlBuilder,
+        LoggerInterface $logger,
         array $meta = [],
         array $data = []
     )
@@ -96,6 +103,7 @@ class VideoProducts implements DataProviderInterface
         $this->adapter = $adapter;
         $this->storeManager = $storeManager;
         $this->urlBuilder = $urlBuilder;
+        $this->logger = $logger;
         $this->meta = $meta;
         $this->data = $data;
     }
@@ -117,6 +125,7 @@ class VideoProducts implements DataProviderInterface
         try {
             $products = $this->adapter->get('/api/products', $websiteId)['products'] ?? [];
         } catch (\Throwable $e) {
+            $this->logger->warning('Flipick: could not load the product grid from the adapter', ['website' => $websiteId, 'error' => $e->getMessage()]);
             return ['totalRecords' => 0, 'items' => []]; // the page controller already shows the reason as a message
         }
         $launchUrl = $this->urlBuilder->getUrl('flipick_videogenerator/index/launch');
