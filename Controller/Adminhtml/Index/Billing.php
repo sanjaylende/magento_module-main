@@ -40,7 +40,7 @@ class Billing extends Action implements HttpGetActionInterface
         try {
             $resultPage = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
             $resultPage->setActiveMenu('Flipick_VideoGenerator::video_generator_billing');
-            $resultPage->getConfig()->getTitle()->prepend(__('Plans & Billing'));
+            $resultPage->getConfig()->getTitle()->prepend(__('Flipick Video Generator'));
 
             return $resultPage;
         } catch (\Throwable $e) {

@@ -2,19 +2,47 @@
 /** @var \Flipick\VideoGenerator\Block\Adminhtml\Billing $block */
 /** @var \Magento\Framework\Escaper $escaper */
 $websites = $block->getWebsites();
+$currentName = '';
+foreach ($websites as $website) {
+    if ($website['current']) {
+        $currentName = $website['name'];
+    }
+}
 ?>
 <?php if (count($websites) > 1): ?>
-    <p>
-        <strong><?= $escaper->escapeHtml(__('Website:')) ?></strong>
-        <?php foreach ($websites as $website): ?>
-            <?php if ($website['current']): ?>
-                <strong><?= $escaper->escapeHtml($website['name']) ?></strong>
-            <?php else: ?>
-                <a href="<?= $escaper->escapeUrl($website['url']) ?>"><?= $escaper->escapeHtml($website['name']) ?></a>
-            <?php endif; ?>
-            &nbsp;
-        <?php endforeach; ?>
-    </p>
+    <?php
+    /* Same markup and classes as Magento's own scope switcher (Magento_Backend store/switcher.phtml), so it looks and behaves
+       like the rest of the admin. The entries are plain links to this page with ?website=ID, so switching needs no extra code. */
+    ?>
+    <div class="flipick-website-switcher">
+        <div class="store-switcher store-view">
+            <span class="store-switcher-label"><?= $escaper->escapeHtml(__('Website:')) ?></span>
+            <div class="actions dropdown closable">
+                <button
+                    type="button"
+                    class="admin__action-dropdown"
+                    data-mage-init='{"dropdown":{}}'
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    id="flipick-website-change-button">
+                    <?= $escaper->escapeHtml($currentName) ?>
+                </button>
+                <ul class="dropdown-menu" data-role="stores-list">
+                    <?php foreach ($websites as $website): ?>
+                        <?php if ($website['current']): ?>
+                            <li class="store-switcher-website disabled current">
+                                <span><?= $escaper->escapeHtml($website['name']) ?></span>
+                            </li>
+                        <?php else: ?>
+                            <li class="store-switcher-website">
+                                <a href="<?= $escaper->escapeUrl($website['url']) ?>"><?= $escaper->escapeHtml($website['name']) ?></a>
+                            </li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
+    </div>
 <?php endif; ?>
 <?php $frameUrl = $block->getFrameUrl(); ?>
 <?php if ($frameUrl === ''): ?>
