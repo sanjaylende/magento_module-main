@@ -78,7 +78,7 @@ Run them on a Magento install that has no developer overrides:
 5. **Websites.** With more than one website, the *Website* dropdown lists them and switching reloads the page for the chosen website.
 6. **Logs.** `var/log/system.log` has no *Flipick* errors.
 
-If step 3 fails with "The Flipick service address is missing in this extension", `ADAPTER_URL` is empty. If the frame stays blank and the browser console mentions *Content-Security-Policy*, the address in `ADAPTER_URL` is not an `http(s)` address (see `var/log/system.log`, message *The Adapter URL is not a valid http(s) address*).
+If step 3 fails with "The Flipick service address is missing in this extension", `ADAPTER_URL` is empty. If the frame stays blank and the browser console mentions *Content-Security-Policy*, the address in `ADAPTER_URL` is not an `http(s)` address (see `var/log/system.log`, message *Flipick: the Adapter URL is not a valid http(s) address; the admin frame will be blocked by CSP*).
 
 ## 5. Related files
 
