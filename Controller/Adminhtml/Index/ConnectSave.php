@@ -14,7 +14,6 @@ use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\ScopeInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,11 +33,6 @@ class ConnectSave extends Action implements HttpPostActionInterface
      * @var IntegrationManager
      */
     private $integrations;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
 
     /**
      * @var ScopeConfigInterface
@@ -64,7 +58,6 @@ class ConnectSave extends Action implements HttpPostActionInterface
         Context $context,
         AdapterClient $adapter,
         IntegrationManager $integrations,
-        StoreManagerInterface $storeManager,
         ScopeConfigInterface $scopeConfig,
         ProductMetadataInterface $productMetadata,
         AuthSession $authSession,
@@ -74,7 +67,6 @@ class ConnectSave extends Action implements HttpPostActionInterface
         parent::__construct($context);
         $this->adapter = $adapter;
         $this->integrations = $integrations;
-        $this->storeManager = $storeManager;
         $this->scopeConfig = $scopeConfig;
         $this->productMetadata = $productMetadata;
         $this->authSession = $authSession;

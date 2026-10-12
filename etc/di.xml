@@ -16,32 +16,12 @@
             <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
         </arguments>
     </type>
-    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Launch">
-        <arguments>
-            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
-        </arguments>
-    </type>
-    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Refresh">
-        <arguments>
-            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
-        </arguments>
-    </type>
-    <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Index">
-        <arguments>
-            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
-        </arguments>
-    </type>
     <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Billing">
         <arguments>
             <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
         </arguments>
     </type>
     <type name="Flipick\VideoGenerator\Controller\Adminhtml\Index\Connect">
-        <arguments>
-            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
-        </arguments>
-    </type>
-    <type name="Flipick\VideoGenerator\Ui\DataProvider\VideoProducts">
         <arguments>
             <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
         </arguments>
@@ -57,11 +37,6 @@
         </arguments>
     </type>
     <type name="Flipick\VideoGenerator\Block\Adminhtml\Billing">
-        <arguments>
-            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
-        </arguments>
-    </type>
-    <type name="Flipick\VideoGenerator\Model\Config\Source\Websites">
         <arguments>
             <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
         </arguments>

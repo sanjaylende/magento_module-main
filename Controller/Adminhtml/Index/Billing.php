@@ -46,7 +46,7 @@ class Billing extends Action implements HttpGetActionInterface
         } catch (\Throwable $e) {
             $this->logger->error('Flipick: Plans & Billing page failed', ['exception' => $e]);
             $this->messageManager->addErrorMessage(__('Plans & Billing could not be opened. The details are in var/log/system.log.'));
-            return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/index');
+            return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('adminhtml/dashboard');
         }
     }
 }

@@ -131,14 +131,6 @@ class AdapterClient
         $this->logger->info('Flipick: adapter credentials saved', ['install_key' => $installKey]);
     }
 
-    public function clearCredentials(): void
-    {
-        $this->configWriter->delete(self::XML_PATH_INSTALL_KEY);
-        $this->configWriter->delete(self::XML_PATH_SECRET);
-        $this->cacheTypeList->cleanType('config');
-        $this->logger->info('Flipick: adapter credentials cleared');
-    }
-
     /**
      * Onboarding call (unsigned: there are no credentials yet). The Magento token proves control of this store.
      *
@@ -154,25 +146,16 @@ class AdapterClient
      * @return array<string, mixed>
      * @throws LocalizedException
      */
-    public function get(string $path, ?string $websiteId = null): array
-    {
-        return $this->signed('GET', $path, null, $websiteId);
-    }
-
-    /**
-     * @return array<string, mixed>
-     * @throws LocalizedException
-     */
     public function post(string $path, array $body = [], ?string $websiteId = null): array
     {
         return $this->signed('POST', $path, $body, $websiteId);
     }
 
     /**
-     * One-time URL that opens the adapter UI for a website (and optionally one product) inside the admin modal.
+     * One-time URL that opens the adapter UI for a website inside the admin page.
      * The launch token is signed with the installation secret and is valid for five minutes, single use.
      */
-    public function launchUrl(string $websiteId, ?string $uniqueTag = null): string
+    public function launchUrl(string $websiteId): string
     {
         $this->assertWebsiteId($websiteId);
         $this->assertHttpUrl($this->getBrowserUrl());
@@ -183,11 +166,7 @@ class AdapterClient
             'n' => bin2hex(random_bytes(12)),
         ])), '+/', '-_'), '=');
         $token = $payload . '.' . hash_hmac('sha256', $payload, $this->getSecret());
-        $query = ['embed' => 1, 'launch' => $token];
-        if ($uniqueTag !== null && $uniqueTag !== '') {
-            $query['product'] = $uniqueTag;
-        }
-        return $this->getBrowserUrl() . '/?' . http_build_query($query);
+        return $this->getBrowserUrl() . '/?' . http_build_query(['embed' => 1, 'launch' => $token]);
     }
 
     /**

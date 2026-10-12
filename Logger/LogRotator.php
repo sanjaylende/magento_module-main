@@ -98,22 +98,6 @@ class LogRotator
         }
     }
 
-    /** Rotates now whatever the time (used by tests and by an admin action). */
-    public function rotateNow(string $reason = 'manual'): ?string
-    {
-        try {
-            if (!$this->ensureDir()) {
-                return null;
-            }
-            return $this->withLock(function () use ($reason) {
-                return $this->rotateLocked($reason);
-            });
-        } catch (\Throwable $e) {
-            error_log('[' . $this->name . '] log rotation failed: ' . $e->getMessage());
-            return null;
-        }
-    }
-
     /** The most recent rotation moment that is not in the future (today 00:05:00, or yesterday's if it is earlier than that). */
     public function lastBoundary(?int $now = null): int
     {
@@ -124,14 +108,6 @@ class LogRotator
             $at = $at->modify('-1 day');
         }
         return $at->getTimestamp();
-    }
-
-    /** The next rotation moment after $from. */
-    public function nextBoundary(?int $from = null): int
-    {
-        $from = $from ?? $this->now();
-        $last = (new \DateTimeImmutable('@' . $this->lastBoundary($from)))->setTimezone($this->timezone);
-        return $last->modify('+1 day')->getTimestamp();
     }
 
     private function now(): int
