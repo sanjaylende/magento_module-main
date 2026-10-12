@@ -26,11 +26,6 @@ class Connect extends Template
         return $this->getUrl('flipick_videogenerator/index/connectsave');
     }
 
-    public function getConfigUrl(): string
-    {
-        return $this->getUrl('adminhtml/system_config/edit', ['section' => 'flipick_videogenerator']);
-    }
-
     public function isAdapterUrlSet(): bool
     {
         return $this->adapter->getBrowserUrl() !== '';

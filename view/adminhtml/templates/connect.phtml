@@ -11,8 +11,7 @@
     </p>
     <?php if (!$block->isAdapterUrlSet()): ?>
         <div class="message message-warning">
-            <?= $escaper->escapeHtml(__('The Flipick service address is not set yet.')) ?>
-            <a href="<?= $escaper->escapeUrl($block->getConfigUrl()) ?>"><?= $escaper->escapeHtml(__('Open settings')) ?></a>
+            <?= $escaper->escapeHtml(__('The Flipick service address is missing in this extension (Model/Endpoints.php). Please contact the extension vendor.')) ?>
         </div>
     <?php else: ?>
         <form action="<?= $escaper->escapeUrl($block->getSaveUrl()) ?>" method="post" id="flipick-connect-form">

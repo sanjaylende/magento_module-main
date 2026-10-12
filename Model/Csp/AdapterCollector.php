@@ -3,14 +3,15 @@ declare(strict_types=1);
 
 namespace Flipick\VideoGenerator\Model\Csp;
 
+use Flipick\VideoGenerator\Model\Endpoints;
 use Magento\Csp\Api\PolicyCollectorInterface;
 use Magento\Csp\Model\Policy\FetchPolicy;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Lets the admin page frame the Flipick adapter wherever it is configured to live (Stores > Configuration > Video
- * Generator > Adapter URL), so changing that address, for example to a new tunnel address, needs no code or XML change.
+ * Lets the admin page frame the Flipick adapter at the address in Endpoints::ADAPTER_URL (or a stored developer override,
+ * for example a tunnel address), so that address needs no separate XML entry.
  * Registered for the admin area only (etc/adminhtml/di.xml).
  */
 class AdapterCollector implements PolicyCollectorInterface
@@ -37,9 +38,9 @@ class AdapterCollector implements PolicyCollectorInterface
     public function collect(array $defaultPolicies = []): array
     {
         try {
-            $url = trim((string)$this->scopeConfig->getValue('flipick_videogenerator/general/adapter_url'));
+            $url = Endpoints::pick($this->scopeConfig->getValue(Endpoints::OVERRIDE_ADAPTER_URL), Endpoints::ADAPTER_URL);
             if ($url === '') {
-                return $defaultPolicies; // not configured yet: nothing to allow
+                return $defaultPolicies; // no address known: nothing to allow
             }
             $parts = parse_url($url);
             if (empty($parts['scheme']) || empty($parts['host']) || !in_array($parts['scheme'], ['http', 'https'], true)) {

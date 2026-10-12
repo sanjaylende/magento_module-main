@@ -119,12 +119,12 @@ class ConnectSave extends Action implements HttpPostActionInterface
     }
 
     /**
-     * The address the adapter uses to reach this store. Merchants normally leave "Store URL for the adapter" empty and the
-     * store's own base URL is used; set it when the adapter must use a different address (for example a Docker host name).
+     * The address the adapter uses to reach this store. Normally Endpoints::STORE_URL_FOR_ADAPTER is empty and the store's own
+     * base URL is used; it is set only when the adapter must use a different address (for example a Docker host name).
      */
     private function publicBaseUrl(string $baseUrl): string
     {
-        $override = trim((string)$this->scopeConfig->getValue('flipick_videogenerator/general/store_url_for_adapter'));
-        return $override !== '' ? rtrim($override, '/') : $baseUrl;
+        $override = $this->adapter->getStoreUrlForAdapter();
+        return $override !== '' ? $override : $baseUrl;
     }
 }

@@ -20,13 +20,12 @@ use Psr\Log\LoggerInterface;
  * replayed or tampered requests. The browser never sees the secret: the admin page opens the adapter with a one-time,
  * signed launch token instead (see launchUrl()).
  *
- * Two URLs: the one an admin's BROWSER uses (adapter_url) and the one this server uses (adapter_server_url). They differ
- * when Magento runs in Docker, where "localhost" is the container itself.
+ * Two URLs: the one an admin's BROWSER uses (Endpoints::ADAPTER_URL) and the one this server uses
+ * (Endpoints::ADAPTER_SERVER_URL, empty = the same). They differ when Magento runs in Docker, where "localhost" is the
+ * container itself. The addresses are constants in Endpoints.php, not admin settings.
  */
 class AdapterClient
 {
-    public const XML_PATH_ADAPTER_URL = 'flipick_videogenerator/general/adapter_url';
-    public const XML_PATH_ADAPTER_SERVER_URL = 'flipick_videogenerator/general/adapter_server_url';
     public const XML_PATH_INSTALL_KEY = 'flipick_videogenerator/connection/install_key';
     public const XML_PATH_SECRET = 'flipick_videogenerator/connection/secret';
     public const EXTENSION_VERSION = '1.0.0';
@@ -85,20 +84,26 @@ class AdapterClient
         $this->logger = $logger;
     }
 
-    /** URL the admin's browser loads (iframe). */
+    /** URL the admin's browser loads (iframe): Endpoints::ADAPTER_URL, unless a developer override is stored. */
     public function getBrowserUrl(): string
     {
-        return rtrim((string)$this->scopeConfig->getValue(self::XML_PATH_ADAPTER_URL), '/');
+        return rtrim(Endpoints::pick($this->scopeConfig->getValue(Endpoints::OVERRIDE_ADAPTER_URL), Endpoints::ADAPTER_URL), '/');
     }
 
     /** URL this server calls; falls back to the browser URL with localhost swapped for host.docker.internal. */
     public function getServerUrl(): string
     {
-        $configured = trim((string)$this->scopeConfig->getValue(self::XML_PATH_ADAPTER_SERVER_URL));
+        $configured = Endpoints::pick($this->scopeConfig->getValue(Endpoints::OVERRIDE_ADAPTER_SERVER_URL), Endpoints::ADAPTER_SERVER_URL);
         if ($configured !== '') {
             return rtrim($configured, '/');
         }
         return preg_replace('#//(localhost|127\.0\.0\.1)(?=[:/]|$)#', '//host.docker.internal', $this->getBrowserUrl());
+    }
+
+    /** The address the adapter uses to reach this store; empty means "use the store's own base URL". */
+    public function getStoreUrlForAdapter(): string
+    {
+        return rtrim(Endpoints::pick($this->scopeConfig->getValue(Endpoints::OVERRIDE_STORE_URL_FOR_ADAPTER), Endpoints::STORE_URL_FOR_ADAPTER), '/');
     }
 
     public function getInstallKey(): string
@@ -233,7 +238,7 @@ class AdapterClient
     {
         $base = $this->getServerUrl();
         if ($base === '') {
-            throw new LocalizedException(__('Set the Adapter URL under Stores > Configuration > Video Generator.'));
+            throw new LocalizedException(__('The Flipick service address is missing in this extension (Model/Endpoints.php).'));
         }
         $this->assertHttpUrl($base);
         if ($websiteId !== null) {

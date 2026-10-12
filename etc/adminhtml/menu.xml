@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
-    Menu: Flipick > Flipick Video Generator (the page that frames the adapter UI). The module's settings are not in the menu;
-    they stay under Stores > Configuration > Flipick. menu.xml actions are validated against ^[A-Za-z0-9/_-]+$, so they must be
+    Menu: Flipick > Flipick Video Generator (the page that frames the adapter UI). The extension has no settings screen; the
+    adapter addresses are constants in Model/Endpoints.php. menu.xml actions are validated against ^[A-Za-z0-9/_-]+$, so they must be
     admin routes, never the adapter's own URL. The product grid page (flipick_videogenerator/index/index) still exists but has
     no menu entry. The item id "video_generator_billing" is kept (the page marks it active in Controller/Adminhtml/Index/Billing.php).
 -->

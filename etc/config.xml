@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
+<!--
+    No default configuration values: the addresses of the Flipick service are constants in Model/Endpoints.php.
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
-    <default>
-        <flipick_videogenerator>
-            <general>
-                <adapter_url/>
-                <adapter_server_url/>
-                <store_url_for_adapter/>
-            </general>
-        </flipick_videogenerator>
-    </default>
+    <default/>
 </config>

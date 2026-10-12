@@ -6,9 +6,8 @@
     restriction is enforced client-side, independent of anything the
     adapter's own server.js does or doesn't send.
 
-    Uncomment the value below and set it to match the Adapter URL configured
-    at Stores -> Configuration -> Video Generator Url (adapter_url), which
-    Block/Adminhtml/Modal.php reads via ScopeConfigInterface.
+    The address in Model/Endpoints.php (ADAPTER_URL) is allowed automatically by Model/Csp/AdapterCollector.php. The fixed
+    value below only covers a local development adapter on this machine.
 -->
 <csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
