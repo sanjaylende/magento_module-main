@@ -7,7 +7,8 @@ namespace Flipick\VideoGenerator\Model;
  * The only place that holds the addresses of the Flipick service. There are no admin settings for them.
  *
  * BEFORE A MARKETPLACE RELEASE: set ADAPTER_URL to the production address of the adapter. Leave the other two empty unless
- * you have a reason (see below). Nothing else in the extension needs to change.
+ * you have a reason (see below). Nothing else in the extension needs to change. The full release checklist and the checks to
+ * run afterwards are in PRODUCTION-CONFIGURATION.md in the extension's root folder.
  *
  * Development override: a developer can still point one installation somewhere else (for example at a Cloudflare tunnel whose
  * address changes on every start) by storing a value under the OVERRIDE_* path in the core_config_data table or in
