@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- Magento has no webhooks: these events only NOTE that the catalog changed (one tiny write); a scheduled job tells the adapter. See Observer/CatalogChanged.php. -->
+    <event name="catalog_product_save_commit_after">
+        <observer name="flipick_videogenerator_catalog_save" instance="Flipick\VideoGenerator\Observer\CatalogChanged"/>
+    </event>
+    <event name="catalog_product_delete_commit_after">
+        <observer name="flipick_videogenerator_catalog_delete" instance="Flipick\VideoGenerator\Observer\CatalogChanged"/>
+    </event>
+    <event name="catalog_product_attribute_update_before">
+        <observer name="flipick_videogenerator_catalog_mass_update" instance="Flipick\VideoGenerator\Observer\CatalogChanged"/>
+    </event>
+    <event name="catalog_product_import_bunch_save_after">
+        <observer name="flipick_videogenerator_catalog_import" instance="Flipick\VideoGenerator\Observer\CatalogChanged"/>
+    </event>
+    <event name="cataloginventory_stock_item_save_commit_after">
+        <observer name="flipick_videogenerator_catalog_stock" instance="Flipick\VideoGenerator\Observer\CatalogChanged"/>
+    </event>
+</config>

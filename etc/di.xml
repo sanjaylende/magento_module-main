@@ -1,6 +1,21 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!-- Every class of this extension logs to its own rotated file (var/log/flipick_videogenerator.log); warnings and errors are also passed to Magento's system.log. -->
+    <type name="Flipick\VideoGenerator\Observer\CatalogChanged">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Model\CatalogChangeNotifier">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
+    <type name="Flipick\VideoGenerator\Cron\NotifyCatalogChanges">
+        <arguments>
+            <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
+        </arguments>
+    </type>
     <type name="Flipick\VideoGenerator\Model\AdapterClient">
         <arguments>
             <argument name="logger" xsi:type="object">Flipick\VideoGenerator\Logger\FlipickLogger</argument>
