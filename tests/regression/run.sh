@@ -30,5 +30,8 @@ out=$(docker exec "$C" php -r 'json_decode(file_get_contents("/tmp/fvgmod/compos
 out=$(docker exec "$C" php /tmp/fvgtools/tests/log-rotator-test.php /tmp/fvgmod/Logger/LogRotator.php 'Flipick\VideoGenerator\Logger\LogRotator' 2>&1); rc=$?
 [ $rc -eq 0 ] && ok "log rotator (rotate, zip, prune)" || bad "log rotator" "$out"
 
+out=$(docker exec -e AUTOLOAD=/var/www/html/vendor/autoload.php -e MODULE=/tmp/fvgmod "$C" php -d error_reporting=24575 /tmp/fvgtools/tests/catalog-change-test.php 2>&1); rc=$?
+[ $rc -eq 0 ] && ok "catalog change signal (queue, scheduled call with back-off, observer never throws): $(echo "$out" | tail -n 1)" || bad "catalog change signal" "$(echo "$out" | grep -E 'FAIL|Fatal|Error' | head -8)"
+
 echo "RESULT passed=$pass failed=$fail"
 [ $fail -eq 0 ]
