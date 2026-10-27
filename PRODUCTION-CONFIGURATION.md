@@ -12,7 +12,7 @@ To go to production (or to publish on the Adobe Commerce Marketplace) you change
 
 | Constant | What it is | Production value |
 |---|---|---|
-| `ADAPTER_URL` | The address of the Flipick adapter that an admin's **browser** opens (inside the frame of the *Flipick Video Generator* page). Also used to allow that address in the admin's Content-Security-Policy (the browser rule about which sites may be framed). | The final public **https** address, for example `https://magento.flipickvideogenerator.com`. No trailing slash needed. |
+| `ADAPTER_URL` | The address of the Flipick adapter that an admin's **browser** opens (inside the frame of the *Flipick Video Generator* page). Also used to allow that address in the admin's Content-Security-Policy (the browser rule about which sites may be framed). | The final public **https** address, for example `https://magento-videogen.flipick.com`. No trailing slash needed. |
 | `ADAPTER_SERVER_URL` | The address the Magento **server** (PHP) uses to call the adapter. | Leave **empty**. Empty means "same as `ADAPTER_URL`". Only a Magento running in Docker next to a local adapter needs a different value (`http://host.docker.internal:4200`). |
 | `STORE_URL_FOR_ADAPTER` | The address the adapter uses to reach the merchant's **store**. | Leave **empty**. Empty means "the store's own base URL". Set it only if the adapter must use a different address than the store advertises. |
 

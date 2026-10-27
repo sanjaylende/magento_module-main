@@ -20,7 +20,7 @@ class Endpoints
     /**
      * Where an admin's BROWSER reaches the adapter (loaded in the frame of the Flipick page). Must be https in production.
      */
-    public const ADAPTER_URL = 'https://magento.flipickvideogenerator.com';
+    public const ADAPTER_URL = 'https://magento-videogen.flipick.com';
 
     /**
      * Where this Magento SERVER reaches the adapter. Leave empty to use ADAPTER_URL (a public address needs nothing else).
