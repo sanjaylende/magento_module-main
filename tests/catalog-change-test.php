@@ -15,7 +15,7 @@ spl_autoload_register(function ($class) use ($module) {
             require $file;
         }
     }
-});
+}, true, true); // prepend: the copy under test must win over an installed copy of the extension that Composer's autoloader may know
 
 use Flipick\VideoGenerator\Model\AdapterClient;
 use Flipick\VideoGenerator\Model\CatalogChangeNotifier;
@@ -84,9 +84,9 @@ class FakeClient extends AdapterClient
     {
         return $this->connected ? $this->key : '';
     }
-    public function post(string $path, array $body = [], ?string $websiteId = null): array
+    public function post(string $path, array $body = [], ?string $websiteId = null, int $timeoutSeconds = 90): array
     {
-        $this->calls[] = ['path' => $path, 'body' => $body, 'website' => $websiteId];
+        $this->calls[] = ['path' => $path, 'body' => $body, 'website' => $websiteId, 'timeout' => $timeoutSeconds];
         if ($this->fail !== null) {
             throw new LocalizedException(__($this->fail));
         }
@@ -210,6 +210,7 @@ $check($notifier->flush($at + 20) === 'sent', 'after the wait the change is sent
 $check(count($client->calls) === 1 && $client->calls[0]['path'] === '/api/v1/catalog-changed', 'one call, to the catalog-changed endpoint');
 $check($client->calls[0]['body'] === ['reason' => 'extension', 'websiteIds' => [2]], 'the body holds only the website ids and a fixed reason');
 $check($client->calls[0]['website'] === null, 'no website header: the call is about the installation');
+$check($client->calls[0]['timeout'] === 10, 'a short timeout: a hung adapter does not hold Magento\'s cron');
 $check(!$flags->data || array_keys($flags->data) === [], 'the queue is empty after a successful call');
 // every website (markAll) is sent without ids
 extract($make());
@@ -252,6 +253,19 @@ extract($make());
 $queue->markWebsites([1]);
 $client->connected = false;
 $check($notifier->flush(5000) === 'not_connected' && !$client->calls && !$flags->data, 'a store that is not connected sends nothing and drops the queue');
+$flags->writes = 0;
+$notifier->flush(5001);
+$check($flags->writes === 0, 'and then costs no writes at all');
+// the server clock jumped: a stored wait far in the future is ignored
+extract($make());
+$queue->markWebsites([1]);
+$queue->saveBackoff(3, time() + 10 * 3600);
+$check($notifier->flush(time() + 100) === 'sent', 'a wait that is longer than the longest possible one (the clock jumped) is ignored');
+// another request marked the same website a moment ago: no second write
+extract($make());
+$flags->data['flipick_vg_dirty_2'] = ['at' => time(), 'first' => time() - 100];
+$queue->markWebsites([2]);
+$check($flags->writes === 0 && $flags->data['flipick_vg_dirty_2']['first'] < time() - 50, 'a mark written a moment ago by another request is not written again');
 // more than 100 websites become "all"
 extract($make());
 $queue->markAll();

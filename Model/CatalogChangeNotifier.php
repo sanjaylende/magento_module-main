@@ -28,6 +28,8 @@ class CatalogChangeNotifier
     public const MAX_BACKOFF_SECONDS = 900;
     /** The adapter accepts at most this many website ids in one call; more than that is sent as "all websites". */
     public const MAX_WEBSITE_IDS = 100;
+    /** A hung adapter must not hold the lock and Magento's cron group for the 90 s of an ordinary call. */
+    public const TIMEOUT_SECONDS = 10;
     private const LOCK = 'flipick_vg_catalog_signal';
 
     /**
@@ -84,16 +86,19 @@ class CatalogChangeNotifier
             }
             $locked = true;
             $websiteIds = $this->websiteIds();
+            $pending = $this->queue->pending($websiteIds);
             if (!$this->client->isConnected()) {
-                $this->queue->clearAll($websiteIds); // nobody to tell, and the queue must not grow for ever
+                if (!$this->queue->isEmpty($pending) || $this->queue->backoff()['fails'] > 0) {
+                    $this->queue->clearAll($websiteIds); // nobody to tell, and the queue must not grow for ever
+                }
                 return 'not_connected';
             }
-            $pending = $this->queue->pending($websiteIds);
             if ($this->queue->isEmpty($pending)) {
                 return 'nothing';
             }
             $backoff = $this->queue->backoff();
-            if ($backoff['next'] > $now) {
+            // a wait longer than the longest possible one means the server clock jumped: ignore it
+            if ($backoff['next'] > $now && $backoff['next'] <= $now + self::MAX_BACKOFF_SECONDS) {
                 return 'backoff';
             }
             $times = array_merge($pending['all'] !== null ? [$pending['all']] : [], array_values($pending['websites']));
@@ -105,7 +110,7 @@ class CatalogChangeNotifier
             if ($pending['all'] === null && $named && count($named) <= self::MAX_WEBSITE_IDS) {
                 $body['websiteIds'] = array_values($named);
             }
-            $this->client->post(self::PATH, $body);
+            $this->client->post(self::PATH, $body, null, self::TIMEOUT_SECONDS);
             $this->queue->clearSent($pending);
             $this->queue->resetBackoff();
             $this->logger->info('Flipick: adapter told that the catalog changed', ['websites' => $body['websiteIds'] ?? 'all']);

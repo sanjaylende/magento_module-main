@@ -10,8 +10,10 @@ use Magento\Framework\FlagManager;
  * (Cron\NotifyCatalogChanges) can tell it, instead of a call for every product that is saved.
  *
  * One flag row per website ("flipick_vg_dirty_<websiteId>") and one for "everything" ("flipick_vg_dirty_all"), each holding the time
- * of the latest change ("at") and of the first change since the adapter was last told ("first"). Writing a row is a single upsert of one timestamp, so two requests changing the same website at the same moment
- * cannot lose each other's mark (a shared list that is read, changed and written back could). Nothing here talks to the network and
+ * of the latest change ("at") and of the first change since the adapter was last told ("first"). Each website has its own row, so two requests
+ * changing different websites never touch the same data (a shared list that is read, changed and written back would lose marks). Two requests
+ * creating the very same row at the very same moment can at worst leave a duplicate row, which costs one extra call to the adapter, and a mark
+ * written between the adapter being told and the row being deleted can be lost, which costs a stale catalog until the next change or a manual Refresh. Nothing here talks to the network and
  * nothing throws into the caller: a failure to remember a change is logged by the observer and the store carries on.
  */
 class CatalogChangeQueue
@@ -141,8 +143,14 @@ class CatalogChangeQueue
         if (isset($this->written[$code]) && $now - $this->written[$code] < 5) {
             return;
         }
+        $data = $this->flags->getFlagData($code);
+        $at = is_array($data) && isset($data['at']) && is_numeric($data['at']) ? (int)$data['at'] : null;
+        if ($at !== null && $now - $at >= 0 && $now - $at < 5) {
+            $this->written[$code] = $now; // marked a moment ago by another request: one cheap read, no write
+            return;
+        }
         // the first change since the adapter was last told is kept, so that a store that is never quiet is still told after the maximum wait
-        $first = $this->readTime($code, 'first') ?? $this->readTime($code) ?? $now;
+        $first = is_array($data) && isset($data['first']) && is_numeric($data['first']) ? (int)$data['first'] : ($at ?? $now);
         $this->flags->saveFlag($code, ['at' => $now, 'first' => $first]);
         $this->written[$code] = $now;
     }

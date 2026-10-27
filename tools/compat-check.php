@@ -15,7 +15,7 @@ spl_autoload_register(function ($class) use ($module) {
             require $file;
         }
     }
-});
+}, true, true); // prepend: the copy under test must win over an installed copy of the extension that Composer's autoloader may know
 
 $failures = [];
 $check = function (bool $ok, string $what) use (&$failures) {

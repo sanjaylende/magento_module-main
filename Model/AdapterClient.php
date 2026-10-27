@@ -146,9 +146,9 @@ class AdapterClient
      * @return array<string, mixed>
      * @throws LocalizedException
      */
-    public function post(string $path, array $body = [], ?string $websiteId = null): array
+    public function post(string $path, array $body = [], ?string $websiteId = null, int $timeoutSeconds = 90): array
     {
-        return $this->signed('POST', $path, $body, $websiteId);
+        return $this->signed('POST', $path, $body, $websiteId, $timeoutSeconds);
     }
 
     /**
@@ -195,25 +195,25 @@ class AdapterClient
         }
     }
 
-    private function signed(string $method, string $path, ?array $body, ?string $websiteId): array
+    private function signed(string $method, string $path, ?array $body, ?string $websiteId, int $timeoutSeconds = 90): array
     {
         if (!$this->isConnected()) {
             throw new LocalizedException(__('This store is not connected to Flipick yet.'));
         }
         try {
-            return $this->send($method, $path, $body, $websiteId, true);
+            return $this->send($method, $path, $body, $websiteId, true, $timeoutSeconds);
         } catch (LocalizedException $e) {
             // A website created after connecting is unknown to the adapter until the websites are synced.
             if ($websiteId !== null && strpos($e->getMessage(), 'Unknown store') !== false) {
                 $this->logger->info('Flipick: website unknown to the adapter, syncing websites and retrying', ['website' => $websiteId]);
                 $this->send('POST', '/api/v1/stores/sync', [], null, true);
-                return $this->send($method, $path, $body, $websiteId, true);
+                return $this->send($method, $path, $body, $websiteId, true, $timeoutSeconds);
             }
             throw $e;
         }
     }
 
-    private function send(string $method, string $path, ?array $body, ?string $websiteId, bool $sign): array
+    private function send(string $method, string $path, ?array $body, ?string $websiteId, bool $sign, int $timeoutSeconds = 90): array
     {
         $base = $this->getServerUrl();
         if ($base === '') {
@@ -225,7 +225,7 @@ class AdapterClient
         }
         $raw = $body === null ? '' : ($body === [] ? '{}' : (string)$this->json->serialize($body));
         $curl = $this->curlFactory->create();
-        $curl->setTimeout(90); // the first call may fetch the whole Magento catalog
+        $curl->setTimeout($timeoutSeconds); // 90 s by default: the first call may fetch the whole Magento catalog
         $curl->setOption(CURLOPT_CONNECTTIMEOUT, 10);
         $curl->addHeader('Accept', 'application/json');
         if ($raw !== '') {
